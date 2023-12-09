@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <style type="text/css">
+      img.big {
+        width: 200px;
+        image-rendering: pixelated;
+      }
+      .subrun {
+        display: flex;
+        flex-direction: row;
+      }
+      .subrun.selected {
+        background-color: #edfff1;
+      }
+      .matches {
+        border-collapse: collapse;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><code>findimg</code></h1>
+    <div class="subrun">
+      <figure>
+        <figcaption>Image</figcaption>
+        <img class="big" src="{{ .Image | imgsrc }}">
+      </figure>
+      <figure>
+        <figcaption>Subimage</figcaption>
+        <img class="big" src="{{ .Subimage | imgsrc }}">
+      </figure>
+    </div>

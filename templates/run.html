@@ -1,0 +1,42 @@
+<h2>{{ .Size.X }}x{{ .Size.Y }}</h1>
+<div class="run">
+{{ range .Subruns }}
+  <div class="subrun {{ if .Selected }}selected{{ end }}">
+    <figure>
+      <figcaption>Image {{ .Image | dim }}</figcaption>
+      <img class="big" src="{{ .Image | imgsrc }}">
+    </figure>
+    <figure>
+      <figcaption>
+      Subimage {{ .Subimage | dim }}
+      </figcaption>
+      <img class="big" src="{{ .Subimage | imgsrc }}">
+    </figure>
+    <figure>
+      <figcaption>Convolution</figcaption>
+      <img class="big" src="{{ .Convolution | imgsrc }}">
+    </figure>
+    <figure>
+      <figcaption>Matches</figcaption>
+      {{ if .Skipped }}<p>{{ .Reason }}</p>{{ end }}
+      <img class="big" src="{{ .Visualized | imgsrc }}">
+    </figure>
+    <table class="matches">
+      <thead>
+        <tr>
+          <th>Match</th>
+          <th>Bounds</th>
+        </tr>
+      </thead>
+      <tbody>
+      {{ range .Matches }}
+        <tr style="background-color: rgba(0, 255, 0, {{ .Match | probalpha | printf "%.4f" }})">
+          <td>{{ .Match | printf "%.4f" }}</td>
+          <td>{{ .Bounds }}</td>
+        </tr>
+      {{ end }}
+      </tbody>
+    </table>
+  </div>
+{{ end }}
+</div>
