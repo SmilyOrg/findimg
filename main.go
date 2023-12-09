@@ -98,7 +98,6 @@ type Opts struct {
 	verbose     bool
 	convolution bool
 	visualize   bool
-	runTmpl     *template.Template
 }
 
 var DEFAULT_OPTS = Opts{
@@ -168,6 +167,8 @@ func main() {
 	opts.imgMinWidth = *imgMinWidth
 	opts.imgMaxWidth = *imgMaxWidth
 	opts.subMinArea = *subMinArea
+	opts.subMaxDiv = *subMaxDiv
+	opts.k = *k
 
 	if opts.html {
 		opts.convolution = true
@@ -178,11 +179,22 @@ func main() {
 
 	switch *output {
 	case "json":
-		json.NewEncoder(os.Stdout).Encode(matches)
+		json.NewEncoder(os.Stdout).Encode(struct {
+			Matches Matches `json:"matches"`
+		}{
+			Matches: matches,
+		})
 	case "html":
 	default:
 		for _, match := range matches {
-			fmt.Printf("%6f %4d %4d %4d %4d\n", match.Match, match.Bounds.Min.X, match.Bounds.Min.Y, match.Bounds.Max.X, match.Bounds.Max.Y)
+			fmt.Printf(
+				"%6f %4d %4d %4d %4d\n",
+				match.Match,
+				match.Bounds.Min.X,
+				match.Bounds.Min.Y,
+				match.Bounds.Dx(),
+				match.Bounds.Dy(),
+			)
 		}
 	}
 }
@@ -269,11 +281,7 @@ func findImage(imgsrc image.Image, subsrc image.Image, opts Opts) []Match {
 		imgHeight := img.Bounds().Max.Y
 		imgScale := float64(imgWidth) / float64(imgsrc.Bounds().Max.X)
 
-		// matches = nil
-		// needle = nil
 		lastTopMatch := 0.0
-		// var matches []Match
-		// var subimgScale float64
 
 		run := Run{
 			Size: image.Point{X: imgWidth, Y: imgHeight},
@@ -283,8 +291,8 @@ func findImage(imgsrc image.Image, subsrc image.Image, opts Opts) []Match {
 
 		for div := 1; div <= opts.subMaxDiv; div *= 2 {
 			sscale := 1.0 / float64(div)
-			sw := int(float64(subsrc.Bounds().Dx()) * sscale * imgScale)
-			sh := int(float64(subsrc.Bounds().Dy()) * sscale * imgScale)
+			sw := int(math.Round(float64(subsrc.Bounds().Dx()) * sscale * imgScale))
+			sh := int(math.Round(float64(subsrc.Bounds().Dy()) * sscale * imgScale))
 			sarea := sw * sh
 			if sarea < opts.subMinArea || sw >= imgWidth || sh >= imgHeight {
 				if opts.verbose {
